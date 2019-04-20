@@ -32,7 +32,7 @@ namespace RunningLoad.Utility
         public Timer(float second)
             : this()
         {
-            limitTime = second;
+            limitTime = second * 60;
             isTimeFlag = false;
         }
 

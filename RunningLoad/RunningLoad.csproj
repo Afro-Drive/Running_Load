@@ -64,6 +64,8 @@
     <Compile Include="Scene\SceneManager.cs" />
     <Compile Include="Scene\Title.cs" />
     <Compile Include="Utility\CountDownTimer.cs" />
+    <Compile Include="Utility\Motion.cs" />
+    <Compile Include="Utility\Range.cs" />
     <Compile Include="Utility\Score.cs" />
     <Compile Include="Utility\Timer.cs" />
   </ItemGroup>

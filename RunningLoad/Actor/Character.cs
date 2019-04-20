@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using RunningLoad.Device;
+using RunningLoad.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,8 @@ namespace RunningLoad.Actor
         protected bool isDeadFlag;//死亡フラグ
         protected int waitTime = 60;//次の出現までの時間(フレーム数60を基準とする）
         protected IMediator mediator;//ゲームの仲介者
+        protected Dictionary<string, Motion> motionDict; //モーションを管理するディクショナリ
+        protected Motion currentMotion; //現在動作中のモーション
         //protected SoundManager soundManager;//SE等を再生→ContentManagerが生成できないため引数に持ってこれず断念
         //protected ContentManager content;→インスタンスの引数が面倒なので削除
 
@@ -35,6 +38,10 @@ namespace RunningLoad.Actor
             this.mediator = mediator;
             //実際の画像より1周りほど小さい判定エリアを生成
             NewHitArea();
+
+            //空の状態で生成(各種派生クラスで別個に生成・追加する)
+            motionDict = null;
+            currentMotion = null;
         }
 
         //抽象メソッド

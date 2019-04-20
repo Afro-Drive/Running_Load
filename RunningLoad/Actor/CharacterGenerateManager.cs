@@ -85,9 +85,9 @@ namespace RunningLoad.Actor
         /// <param name="renderer"></param>
         public void Draw(Renderer renderer)
         {
-            foreach (var runner in runners) runner.Draw(renderer);
             foreach (var fixedEnem in fixEnems) fixedEnem.Draw(renderer);
             foreach (var flying in flyings) flying.Draw(renderer);
+            foreach (var runner in runners) runner.Draw(renderer);
         }
 
         /// <summary>

@@ -40,7 +40,7 @@ namespace RunningLoad.Actor
         /// </summary>
         public override void Initialize()
         {
-            waitTime = random.Next(60, 120);
+            waitTime = 60 * random.Next(1, 5);
 
             int rnd = random.Next(4);
             switch (rnd)
@@ -58,6 +58,20 @@ namespace RunningLoad.Actor
                     InitAbove();
                     break;
             }
+
+            //モーション管理ディクショナリの生成・登録
+            motionDict = new Dictionary<string, Motion>()
+            {
+                { "fly", new Motion(new Range(0, 5), new CountDownTimer(0.001f)) },
+            };
+            //モーションの切り取り範囲を登録
+            for(int i = 0; i <= 5; i++)
+            {
+                motionDict["fly"].Add(i,
+                    new Rectangle(new Point(160 * i, 0), new Point(160, 64)));
+            }
+            //運用モーションを設定
+            currentMotion = motionDict["fly"];
         }
         #region 初期化位置の一覧
         /// <summary>
@@ -107,6 +121,9 @@ namespace RunningLoad.Actor
             //X座標の負の方向に15ずつ進む
             position.X -= mediator.GetScroll() + 5f;//スクロールスピードより少し早めに
 
+            //モーションの更新
+            currentMotion.Update(gameTime);
+
             //画面外に出たら
             if (position.X < 0)
             {
@@ -116,6 +133,7 @@ namespace RunningLoad.Actor
                     Initialize();//初期化（再び待ち時間、位置を設定する）
                 }
             }
+
             //フレームごとに当たり判定エリアの生成
             NewHitArea();
         }
@@ -134,7 +152,13 @@ namespace RunningLoad.Actor
             //    null,
             //    new Vector2(hitArea.Width, hitArea.Height),
             //    Vector2.Zero);
-            renderer.DrawTexture(name, position, null, 0.2f, Vector2.Zero);
+
+            renderer.DrawTexture(
+                "puteranodon_flying",
+                position,
+                currentMotion.DrawingRange());
+
+            //renderer.DrawTexture(name, position, null, 0.2f, Vector2.Zero);
         }
 
         public override void NewHitArea()

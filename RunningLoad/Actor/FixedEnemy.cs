@@ -33,7 +33,7 @@ namespace RunningLoad.Actor
         public override void Initialize()
         {
             position = new Vector2(rand.Next(1300 + 64, 1300 + 64 + 300), 378);
-            waitTime *= rand.Next(3, 6);
+            waitTime = 60 * rand.Next(1, 5);
         }
 
         /// <summary>
@@ -46,10 +46,10 @@ namespace RunningLoad.Actor
 
             if (position.X < -15)
             {
-                waitTime -= 1 * 60;
-                if (waitTime <= 0)//待ち時間が０になったら
+                waitTime -= 1;
+                if (waitTime == 0)//待ち時間が０になったら
                 {
-                    Initialize();//初期化
+                     Initialize();//初期化
                 }
             }
             NewHitArea();//当たり判定生成しなおし
@@ -93,11 +93,11 @@ namespace RunningLoad.Actor
             //    new Vector2(0, 0));
             if (!isDeadFlag)
             {
-                renderer.DrawTexture(name, position, null, 0.15f, Vector2.Zero);
+                renderer.DrawTexture(name, position);
             }
             else//死亡時は花を咲かす（笑）
             {
-                renderer.DrawTexture("saboten_flower", position, null, 0.15f, Vector2.Zero);
+                renderer.DrawTexture("saboten_flower", position);
             }
         }
 

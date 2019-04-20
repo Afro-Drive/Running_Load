@@ -134,18 +134,27 @@ namespace RunningLoad
 
             // この下にロジックを記述
             #region 画像リソース
-            renderer.LoadContent("white");
-            renderer.LoadContent("black");
             renderer.LoadContent("stage");
-            renderer.LoadContent("ending");
-            renderer.LoadContent("title");
+            renderer.LoadContent("bluesky_cloudy");
             renderer.LoadContent("number");
             renderer.LoadContent("score");
+
+            //シーンごとの背景
+            renderer.LoadContent("ending");
+            renderer.LoadContent("title");
+
+            //使用キャラクター
+            //ティラノサウルス関連
+            renderer.LoadContent("dinasour_nikushoku");
+            renderer.LoadContent("dinasour_running");
+            renderer.LoadContent("dinasour_squat");
+            renderer.LoadContent("dinasour_cry");
+            //プテラノドン関連
             renderer.LoadContent("puteranodon");
+            renderer.LoadContent("puteranodon_flying");
+            //サボテン関連
             renderer.LoadContent("saboten");
             renderer.LoadContent("saboten_flower");
-            renderer.LoadContent("dinasour_nikushoku");
-            renderer.LoadContent("bluesky_cloudy");
             #endregion
 
             #region BGM（MP3）リソース

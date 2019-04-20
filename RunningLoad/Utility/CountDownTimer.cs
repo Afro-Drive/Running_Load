@@ -30,7 +30,7 @@ namespace RunningLoad.Utility
         public CountDownTimer(float second)
             : base(second)
         {
-            currentTime = second;
+            currentTime = second * 60;
         }
 
         /// <summary>

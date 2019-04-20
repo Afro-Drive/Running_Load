@@ -85,8 +85,8 @@ namespace RunningLoad.Scene
                 isEndFlag = true;//シーンを終了させる
             }
 
-            //2000点ごとにスピードアップ！
-            if(GetScore() % 100 == 0 /*&& GetScore() > 0*/)
+            //1000点ごとにスピードアップ！
+            if(GetScore() % 1000 == 0 && GetScore() > 0)
             {
                 SetScroll(15f + 200f * GetScore() % 100);
             }

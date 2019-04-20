@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using RunningLoad.Def;
 using RunningLoad.Device;
+using RunningLoad.Utility;
 
 namespace RunningLoad.Actor
 {
@@ -24,6 +25,9 @@ namespace RunningLoad.Actor
         private readonly float jumpPower = 3.7f;//ジャンプ時の初速
         private SoundManager sound;//サウンド管理者
 
+        private readonly float landPosY = 410; //着地点(Y座標)
+        private readonly float squatLandPosY = 420; //しゃがみ時の着地点(Y座標)
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -39,6 +43,25 @@ namespace RunningLoad.Actor
         public override void Initialize()
         {
             sound = DeviceManager.CreateInstance().GetSound();
+            //モーション管理ディクショナリを生成・登録
+            motionDict = new Dictionary<string, Motion>()
+            {
+                { "run", new Motion(new Range(0, 5), new CountDownTimer(0.001f)) }, //走っている状態
+                { "squat", new Motion(new Range(0, 4), new CountDownTimer(0.001f)) },　//しゃがんでいる状態
+            };
+            //モーションごとの切り取り範囲の登録
+            for (int i = 0; i <= 5; i++)
+            {
+                motionDict["run"].Add(i,
+                    new Rectangle(new Point(256 * i, 0), new Point(256, 128)));
+            }
+            for (int i = 0; i <= 4; i++)
+            {
+                motionDict["squat"].Add(i,
+                    new Rectangle(new Point(256 * i, 0), new Point(256, 128)));
+            }
+            //最初は走っている状態でセット
+            currentMotion = motionDict["run"];
 
             doSquatFlag = false;//しゃがみ状態でない
             position = new Vector2(100, 345);
@@ -73,7 +96,7 @@ namespace RunningLoad.Actor
 
             #region ジャンプ処理
             //Y軸負の方向への力を生じる
-            if ((Input.IskeyDown(Keys.Up) || Input.IskeyDown(Keys.Space)) && position.Y == 345)
+            if ((Input.IskeyDown(Keys.Up) || Input.IskeyDown(Keys.Space)) && position.Y == landPosY)
             {
                 sound.PlaySE("punyu");//ジャンプ音
                 vy = -jumpPower; //初速度を生じる
@@ -137,16 +160,24 @@ namespace RunningLoad.Actor
             //    position.Y = 0.0f;
             //}
             #endregion
-            if (position.Y > 345 && !doSquatFlag)
+            if (position.Y > landPosY && !doSquatFlag)
             {
-                position.Y = 345;
+                position.Y = landPosY;
                 vy = 0;
             }
-            else if (position.Y > 390 && doSquatFlag)
+            else if (position.Y > squatLandPosY && doSquatFlag)
             {
-                position.Y = 390;
+                position.Y = squatLandPosY;
                 vy = 0;
             }
+
+            //使用するモーションの更新
+            if (doSquatFlag)
+                currentMotion = motionDict["squat"];
+            else
+                currentMotion = motionDict["run"];
+            //モーションの更新
+            currentMotion.Update(gameTime);
 
             //当たり判定エリアを生成し続ける
             NewHitArea();
@@ -180,16 +211,21 @@ namespace RunningLoad.Actor
         /// </summary>
         public override void NewHitArea()
         {
-            hitArea = new Rectangle(
-                new Point((int)position.X + 110, (int)position.Y + 80),
-                new Point(170, 50));
-            //if (doSquatFlag)
-            //{
-            //    //従来の半分のエリアを生成
-            //    hitArea = new Rectangle(
-            //        new Point((int)position.X + 140, (int)position.Y + 80 + 50),
-            //        new Point(140, 40 / 2));//Y方向の矩形の一辺が半分
-            //}
+            //しゃがみようのエリア生成
+            if (doSquatFlag)
+            {
+                //従来の半分のエリアを生成
+                hitArea = new Rectangle(
+                    new Point((int)position.X + 60, (int)position.Y + 30),
+                    new Point(170, 50));//Y方向の矩形の一辺が半分
+            }
+            //走っているときの当たり判定生成
+            else
+            {
+                hitArea = new Rectangle(
+                    new Point((int)position.X + 60, (int)position.Y + 15),
+                    new Point(170, 50));
+            }
         }
         /// <summary>
         /// 描画（0.2倍スケール）
@@ -198,38 +234,34 @@ namespace RunningLoad.Actor
         /// <param name="renderer"></param>
         public override void Draw(Renderer renderer)
         {
-
-            if (IsDead())//死亡時の描画
-            {
-                //後ほど変更予定
-                renderer.DrawTexture(name, position, null, 0.2f, Vector2.Zero);
-            }
-            if (doSquatFlag)//しゃがみ時の描画
-            {
-                renderer.DrawTexture(
-                    name,
-                    position,
-                    new Rectangle(
-                        new Point(0, 0), new Point(1480, (int)(1026 / 1.7))), //画像の大きさを基準に切り取り範囲を決定
-                    0.2f,
-                    Vector2.Zero);
-            }
-            else
-                renderer.DrawTexture(name, position, null, 0.2f, Vector2.Zero);
+            //ココのコメントを外すと当たり判定のエリアが出てくる
             //renderer.DrawTexture(
             //    "hitArea_R",
             //    new Vector2(hitArea.X, hitArea.Y),
             //    null,
             //    new Vector2(hitArea.Width, hitArea.Height),
             //    Vector2.Zero);
+
+            if (IsDead())//死亡時の描画
+            {
+                renderer.DrawTexture("dinasour_cry", position);
+            }
+            else
+            {
+                if (doSquatFlag)//しゃがみ時の描画
+                {
+                    renderer.DrawTexture(
+                        "dinasour_squat",
+                        position,
+                        currentMotion.DrawingRange());
+                }
+                else
+                    renderer.DrawTexture(
+                        "dinasour_running",
+                        position,
+                        currentMotion.DrawingRange());
+            }
+            //renderer.DrawTexture(name, position, null, 0.2f, Vector2.Zero);
         }
-
-        ///// <summary>
-        ///// しゃがみ状態での当たり判定の生成
-        ///// </summary>
-        //public void NewHitArea_half()
-        //{
-        //}
-
     }
 }
